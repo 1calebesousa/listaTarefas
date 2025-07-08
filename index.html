@@ -1,66 +1,117 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Lista de Tarefas</title>
   <style>
+    /* Definindo cores para tema claro e escuro */
+    :root {
+      --bg-color-light: #fff;
+      --text-color-light: #000;
+      --bg-color-dark: #121212;
+      --text-color-dark: #f0f0f0;
+    }
+
+    /* Estilos para o tema claro */
+    body[data-theme="light"] {
+      background-color: var(--bg-color-light);
+      color: var(--text-color-light);
+    }
+
+    /* Estilos para o tema escuro */
+    body[data-theme="dark"] {
+      background-color: var(--bg-color-dark);
+      color: var(--text-color-dark);
+    }
+
+    /* Estilos gerais do corpo da página */
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
+      font-family: Arial, sans-serif; /* Fonte usada na página */
+      padding: 20px;                  /* Espaço interno ao redor */
+      max-width: 600px;               /* Largura máxima da página */
+      margin: auto;                  /* Centraliza horizontalmente */
+      transition: background-color 0.3s, color 0.3s; /* Suaviza troca de tema */
     }
 
+    /* Estilo para inputs, botões e select */
     input[type="text"], button, select {
-      padding: 10px;
-      margin: 5px 0;
+      padding: 10px;  /* Espaço interno */
+      margin: 5px 0;  /* Espaço externo em cima e embaixo */
     }
 
+    /* Remove marcador das listas */
     ul {
       list-style: none;
-      padding: 0;
+      padding: 0; /* Remove espaçamento padrão */
     }
 
+    /* Cada item da lista */
     li {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: 10px; /* Espaço interno */
+      border-bottom: 1px solid #ddd; /* Linha abaixo do item */
+      display: flex; /* Usa flexbox para alinhar itens */
+      justify-content: space-between; /* Espaça os elementos ao máximo */
+      align-items: center; /* Alinha verticalmente ao centro */
+      flex-wrap: wrap; /* Permite quebra de linha se necessário */
     }
 
-    li.concluida span {
+    /* Quando a tarefa está concluída, risca o texto e muda a cor */
+    li.concluida span.texto {
       text-decoration: line-through;
       color: gray;
     }
 
+    /* Estilo dos botões agrupados */
     .botoes button {
-      margin-left: 5px;
+      margin-left: 5px; /* Espaço entre os botões */
     }
 
+    /* Espaçamento da seção de filtros */
     .filtros {
       margin: 10px 0;
     }
 
-    #novaTarefa{
-        border-radius: 20px;
+    /* Estilo arredondado para o input da nova tarefa */
+    #novaTarefa {
+      border-radius: 20px;
     }
 
-    #addtarefa{
-        border-radius: 10px;
-    } 
+    /* Estilo arredondado para os botões */
+    #addtarefa, #toggleTheme {
+      border-radius: 10px;
+    }
 
-    #filtro{
-        border-radius: 10px;
+    /* Estilo arredondado para o select de filtro */
+    #filtro {
+      border-radius: 10px;
+    }
+
+    /* Estilo para o contador de cliques da tarefa */
+    .contador {
+      font-size: 0.9em; /* Fonte menor */
+      color: gray;
+      margin-left: 10px; /* Espaço à esquerda */
+    }
+
+    /* Faz o texto da tarefa parecer clicável */
+    span.texto {
+      cursor: pointer;
     }
   </style>
 </head>
-<body>
 
+<body data-theme="light">
   <h2>📋 Lista de Tarefas</h2>
-  <input type="text" id="novaTarefa" placeholder="Digite uma nova tarefa">
-  <button id="addtarefa">Adicionar</button> <!-- REMOVIDO onclick -->
 
+  <!-- Botão para alternar entre tema claro e escuro -->
+  <button id="toggleTheme">🌙 Alternar Tema</button>
+
+  <!-- Input para digitar nova tarefa -->
+  <input type="text" id="novaTarefa" placeholder="Digite uma nova tarefa" />
+  <!-- Botão para adicionar a tarefa digitada -->
+  <button id="addtarefa">Adicionar</button>
+
+  <!-- Área de filtros para mostrar tarefas -->
   <div class="filtros">
     <label for="filtro">Filtrar: </label>
     <select id="filtro">
@@ -70,44 +121,69 @@
     </select>
   </div>
 
+  <!-- Lista onde as tarefas serão exibidas -->
   <ul id="listaTarefas"></ul>
 
   <script>
+    // Array para guardar as tarefas
     let tarefas = [];
 
+    // Função que roda quando a página carrega
     window.onload = function () {
+      // Pega as tarefas salvas no navegador (se houver)
       const armazenadas = localStorage.getItem("tarefas");
-      if (armazenadas) {
-        tarefas = JSON.parse(armazenadas);
-      }
-      renderizarTarefas();
+      if (armazenadas) tarefas = JSON.parse(armazenadas); // Transforma o texto em objeto
+      renderizarTarefas(); // Mostra as tarefas na tela
+
+      // Configura o tema salvo ou define claro como padrão
+      const temaSalvo = localStorage.getItem('theme') || 'light';
+      document.body.setAttribute('data-theme', temaSalvo);
+      atualizarBotaoTema();
+    };
+
+    // Evento para mudar tema quando botão é clicado
+    document.getElementById('toggleTheme').addEventListener('click', () => {
+      const temaAtual = document.body.getAttribute('data-theme');
+      // Alterna entre claro e escuro
+      const novoTema = temaAtual === 'light' ? 'dark' : 'light';
+      document.body.setAttribute('data-theme', novoTema);
+      localStorage.setItem('theme', novoTema); // Salva o tema escolhido
+      atualizarBotaoTema(); // Atualiza texto do botão
+    });
+
+    // Atualiza o texto do botão de tema conforme tema atual
+    function atualizarBotaoTema() {
+      const tema = document.body.getAttribute('data-theme');
+      const btn = document.getElementById('toggleTheme');
+      btn.textContent = tema === 'light' ? '🌙 Modo Escuro' : '☀️ Modo Claro';
     }
 
-    // EVENTO 1- botão para Adicionar tarefa
+    // Evento do botão "Adicionar" para criar uma nova tarefa
     document.getElementById("addtarefa").addEventListener("click", adicionarTarefa);
 
-    // evento 2 - sistema de Filtros
-    document.getElementById("filtro").addEventListener("change", renderizarTarefas);
+    // Função para adicionar uma nova tarefa ao array e salvar
+    function adicionarTarefa() {
+      const input = document.getElementById("novaTarefa");
+      const texto = input.value.trim(); // Remove espaços extras
 
+      if (texto === "") {
+        alert("Digite uma tarefa válida."); // Impede adicionar tarefa vazia
+        return;
+      }
+
+      // Adiciona a tarefa com contador zerado e status não concluído
+      tarefas.push({ texto, concluida: false, contador: 0 });
+      salvarNoLocalStorage(); // Salva no navegador
+      input.value = ""; // Limpa o campo de texto
+      renderizarTarefas(); // Atualiza a lista na tela
+    }
+
+    // Função para salvar o array de tarefas no localStorage
     function salvarNoLocalStorage() {
       localStorage.setItem("tarefas", JSON.stringify(tarefas));
     }
 
-    function adicionarTarefa() {
-      const input = document.getElementById("novaTarefa");
-      const texto = input.value.trim();
-
-      if (texto === "") {
-        alert("Digite uma tarefa válida.");
-        return;
-      }
-
-      tarefas.push({ texto: texto, concluida: false });
-      salvarNoLocalStorage();
-      input.value = "";
-      renderizarTarefas();
-    }
-
+    // Função para editar o texto de uma tarefa
     function editarTarefa(index) {
       const novoTexto = prompt("Editar tarefa:", tarefas[index].texto);
       if (novoTexto !== null && novoTexto.trim() !== "") {
@@ -117,66 +193,99 @@
       }
     }
 
+    // Função que mostra as tarefas na tela, conforme filtro selecionado
     function renderizarTarefas() {
       const lista = document.getElementById("listaTarefas");
       const filtro = document.getElementById("filtro").value;
-      lista.innerHTML = "";
+      lista.innerHTML = ""; // Limpa a lista antes de renderizar
 
+      // Para cada tarefa no array...
       tarefas.forEach((tarefa, index) => {
-        const deveMostrar =
+        // Decide se deve mostrar conforme filtro
+        const mostrar =
           filtro === "todas" ||
           (filtro === "concluidas" && tarefa.concluida) ||
           (filtro === "pendentes" && !tarefa.concluida);
 
-        if (deveMostrar) {
-          const li = document.createElement("li");
-          if (tarefa.concluida) li.classList.add("concluida");
+        if (mostrar) {
+          const li = document.createElement("li"); // Cria item da lista
+          if (tarefa.concluida) li.classList.add("concluida"); // Adiciona classe se concluída
 
-          const span = document.createElement("span");
-          span.textContent = tarefa.texto;
+          const spanTexto = document.createElement("span");
+          spanTexto.className = "texto";
+          spanTexto.textContent = tarefa.texto;
+          spanTexto.title = "Clique para aumentar a contagem"; // Dica ao passar mouse
 
+          // Quando clica no texto, aumenta o contador dessa tarefa
+          spanTexto.addEventListener("click", () => {
+            tarefa.contador = (tarefa.contador || 0) + 1; // Incrementa contador
+            salvarNoLocalStorage();
+            renderizarTarefas(); // Atualiza a lista para mostrar novo contador
+          });
+
+          // Mostra a quantidade de cliques na tarefa
+          const contadorSpan = document.createElement("span");
+          contadorSpan.className = "contador";
+          contadorSpan.textContent = `Cliques: ${tarefa.contador || 0}`;
+
+          // Div que vai guardar os botões
           const botoes = document.createElement("div");
           botoes.className = "botoes";
 
+          // Botão para marcar/desmarcar como concluída
           const btnConcluir = document.createElement("button");
           btnConcluir.textContent = "✔️";
-
-          // evento 3 - botão Concluir, serve para indicar que ja fiz essa tarefa
           btnConcluir.addEventListener("click", () => {
-            tarefa.concluida = !tarefa.concluida;
+            tarefa.concluida = !tarefa.concluida; // Alterna o estado
             salvarNoLocalStorage();
             renderizarTarefas();
           });
 
+          // Botão para editar tarefa
           const btnEditar = document.createElement("button");
           btnEditar.textContent = "✏️";
-
-          // evento 4 - botão Editar, serve para editar o nome da atividade
           btnEditar.addEventListener("click", () => editarTarefa(index));
 
+          // Botão para remover tarefa
           const btnRemover = document.createElement("button");
           btnRemover.textContent = "🗑️";
-
-          // EVENTO 5 - botão Remover, serve para remover uma tarefa
           btnRemover.addEventListener("click", () => {
-            if (confirm("Tem certeza que deseja remover esta tarefa?")) {
-              tarefas.splice(index, 1);
+            if (confirm("Remover esta tarefa?")) {
+              tarefas.splice(index, 1); // Remove do array
               salvarNoLocalStorage();
               renderizarTarefas();
             }
           });
 
+          // Botão para zerar o contador da tarefa
+          const btnReset = document.createElement("button");
+          btnReset.textContent = "🔄";
+          btnReset.title = "Zerar contagem";
+          btnReset.addEventListener("click", () => {
+            tarefa.contador = 0; // Zera contador
+            salvarNoLocalStorage();
+            renderizarTarefas();
+          });
+
+          // Adiciona todos os botões ao container
           botoes.appendChild(btnConcluir);
           botoes.appendChild(btnEditar);
           botoes.appendChild(btnRemover);
+          botoes.appendChild(btnReset);
 
-          li.appendChild(span);
+          // Adiciona o texto, contador e botões ao item da lista
+          li.appendChild(spanTexto);
+          li.appendChild(contadorSpan);
           li.appendChild(botoes);
+
+          // Adiciona o item à lista na página
           lista.appendChild(li);
         }
       });
     }
-  </script>
 
+    // Quando o filtro mudar, atualiza a lista
+    document.getElementById("filtro").addEventListener("change", renderizarTarefas);
+  </script>
 </body>
 </html>
