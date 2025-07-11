@@ -10,6 +10,9 @@
       --text-color-light: #000;
       --bg-color-dark: #121212;
       --text-color-dark: #f0f0f0;
+      --bg-color-pink: #d405e7;
+      --text-color-dark: #ffffff;
+
     }
 
     /* Estilos para o tema claro */
@@ -22,6 +25,12 @@
     body[data-theme="dark"] {
       background-color: var(--bg-color-dark);
       color: var(--text-color-dark);
+    }
+
+    /*estilo tema rosa*/
+    body[data-theme="pink"] {
+      background-color: var(--bg-color-pink);
+      color: var(--text-color-pink);
     }
 
     /* Estilos gerais do corpo da página */
@@ -81,6 +90,10 @@
       border-radius: 10px;
     }
 
+    #addtarefa, #pinkTheme {
+      border-radius: 10px;
+    }
+
     /* Estilo arredondado para o select de filtro */
     #filtro {
       border-radius: 10px;
@@ -105,6 +118,7 @@
 
   <!-- Botão para alternar entre tema claro e escuro -->
   <button id="toggleTheme">🌙 Alternar Tema</button>
+  <button id="pinkTheme">Tema Rosa</button>
 
   <!-- Input para digitar nova tarefa -->
   <input type="text" id="novaTarefa" placeholder="Digite uma nova tarefa" />
@@ -144,8 +158,13 @@
     // Evento para mudar tema quando botão é clicado
     document.getElementById('toggleTheme').addEventListener('click', () => {
       const temaAtual = document.body.getAttribute('data-theme');
+
+      document.getElementById('pinkTheme').addEventListener('click', () => {
+        const temaRosa = document.body.getAttribute('data-theme');
+
+
       // Alterna entre claro e escuro
-      const novoTema = temaAtual === 'light' ? 'dark' : 'light';
+      const novoTema = temaAtual === 'light' ? 'dark': 'light';
       document.body.setAttribute('data-theme', novoTema);
       localStorage.setItem('theme', novoTema); // Salva o tema escolhido
       atualizarBotaoTema(); // Atualiza texto do botão
@@ -153,7 +172,7 @@
 
     // Atualiza o texto do botão de tema conforme tema atual
     function atualizarBotaoTema() {
-      const tema = document.body.getAttribute('data-theme');
+    const tema = document.body.getAttribute('data-theme');
       const btn = document.getElementById('toggleTheme');
       btn.textContent = tema === 'light' ? '🌙 Modo Escuro' : '☀️ Modo Claro';
     }
